@@ -1,0 +1,5 @@
+simple particle system with canvas renderer, configurable particles and no images (so far). the idea behind is that you should be able to define behaviour of your particles as completely as possible, modify it dynamically and target every single particle if needed. 
+
+it's not ready yet. lots of optimisations can be done, API is not finished, and premade effects are not polished.
+
+demo page: http://dev.wildcard.pl/effie/
