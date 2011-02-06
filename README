@@ -3,3 +3,14 @@ simple particle system with canvas renderer, configurable particles and no image
 it's not ready yet. lots of optimisations can be done, API is not finished, and premade effects are not polished.
 
 demo page: http://dev.wildcard.pl/effie/
+
+simple usage:
+
+`effie.createEffect({
+	name: 'test',
+	duration: 3,
+	count: 1,
+	sizeX: 5,
+	sizeY: 5,
+	color: 'yellow'
+}).startEffect();'

@@ -118,7 +118,9 @@ effie = (function() {
 
 			context.fillRect(x, y, sizeX, sizeY);
 			ctx.restore();
-		}
+		};
+
+		effect = null;
 
 
 	};
@@ -212,6 +214,8 @@ effie = (function() {
 
 			document.body.appendChild(canvas);
 
+			canvas = null;
+
 			return this;
 
 
@@ -220,28 +224,36 @@ effie = (function() {
 		startTimer: function() {
 		},
 
+		stopTimer: function() {
+			clearInterval(effie.ticker.timer);
+		},
+
 		update: function(dt, elapsedTime) {
-			canvas.width = canvas.width;
-			for (var i = 0; i < this.currentEffects.length; i++) {
+			effie.data.canvas.width = effie.data.canvas.width;
+			for (var i = 0; i < this.currentEffects.length; ) {
+				
+				if (this.currentEffects[i].particles.length == 0) {
+					this.currentEffects.splice(i, 1);
+					continue;
+				}
+
 				this.currentEffects[i].update(dt, elapsedTime);
+				i++;					
+
 			}
 			ctx.fillStyle = "white";
 			ctx.globalAlpha = 1;
 			ctx.fillText(effie.ticker.fps | 0, 10, 10, 30);
 		},
 
-		createEffect: function(effectName, coords) {
-
-			if (!effie.effects[effectName]) {
-				throw "No such effect " + effectName;
-			}
+		createEffect: function(effect, coords) {
 
 			var effect,
 				clearMode,
 				emitter,
 				effectDuration;
 
-			effectDuration = effie.effects[effectName].duration || Infinity;
+			effectDuration = effect.duration || Infinity;
 
 			var eff = {
 
@@ -268,20 +280,19 @@ effie = (function() {
 
 				addParticle: function() {
 					if (typeof emitter == "function") {
-						coords = emitter.call(effie.effects[effect]);
+						coords = emitter.call(effect);
 					} else {
 						coords = emitter.concat();
 					}
-					eff.particles.push(new Particle(coords[0], coords[1], effie.effects[effect]));
+					eff.particles.push(new Particle(coords[0], coords[1], effect));
 				},
 
 
 				startEffect: function() {
-					effect = effectName;
-					clearMode = effie.effects[effectName].clearMode;
-					emitter = coords || effie.effects[effectName].emitterCoords || [effie.data.halfw, effie.data.halfh];
+					clearMode = effect.clearMode;
+					emitter = coords || effect.emitterCoords || [effie.data.halfw, effie.data.halfh];
 
-					var len = effie.effects[effectName].count;
+					var len = effect.count;
 
 					for (var i = 0; i < len; i++) {
 						eff.addParticle()
@@ -297,6 +308,8 @@ effie = (function() {
 
 				update: function(dt, elapsedTime) {
 					effectDuration -= (dt*1000);
+
+					
 					for (var i = 0; i < this.particles.length; i++) {
 						if (!this.particles[i].isDead) {
 							this.particles[i].update(dt, elapsedTime);
@@ -307,6 +320,7 @@ effie = (function() {
 								this.particles[i].callbackAfterDeath(this);
 							}
 							this.particles.splice(i, 1);
+							//console.log(this.particles.length)
 						}
 					}
 				}
