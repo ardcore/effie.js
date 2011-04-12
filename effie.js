@@ -173,12 +173,12 @@ effie = (function() {
 
 		applyTo: function(el) {
 			var quickDelegate, pos;
-			quickDelegate = function(event, target) {
+			quickDelegate = function(event) {
 				var eventCopy = document.createEvent("MouseEvents");
 				eventCopy.initMouseEvent(event.type, event.bubbles, event.cancelable, event.view, event.detail,
 					event.pageX || event.layerX, event.pageY || event.layerY, event.clientX, event.clientY, event.ctrlKey, event.altKey,
 					event.shiftKey, event.metaKey, event.button, event.relatedTarget);
-				target.dispatchEvent(eventCopy);
+				el.dispatchEvent(eventCopy);
 				// ... and in webkit I could just dispath the same event without copying it. eh.
 			};
 
@@ -199,18 +199,10 @@ effie = (function() {
 			canvas.style.top = pos[1] + "px";
 			canvas.id = "effie-" + canvas.id;
 
-			canvas.addEventListener("click", function(e) {
-				quickDelegate(e, el)
-			}, false);
-			canvas.addEventListener("mousemove", function(e) {
-				quickDelegate(e, el)
-			}, false);
-			canvas.addEventListener("mouseup", function(e) {
-				quickDelegate(e, el)
-			}, false);
-			canvas.addEventListener("mousedown", function(e) {
-				quickDelegate(e, el)
-			}, false);
+			canvas.addEventListener("click", quickDelegate, false);
+			canvas.addEventListener("mousemove", quickDelegate, false);
+			canvas.addEventListener("mouseup", quickDelegate, false);
+			canvas.addEventListener("mousedown", quickDelegate, false);
 
 			document.body.appendChild(canvas);
 
@@ -231,14 +223,15 @@ effie = (function() {
 		update: function(dt, elapsedTime) {
 			effie.data.canvas.width = effie.data.canvas.width;
 			for (var i = 0; i < this.currentEffects.length; ) {
-				
+
 				if (this.currentEffects[i].particles.length == 0) {
+					this.currentEffects[i] = null;
 					this.currentEffects.splice(i, 1);
 					continue;
 				}
 
 				this.currentEffects[i].update(dt, elapsedTime);
-				i++;					
+				i++;
 
 			}
 			ctx.fillStyle = "white";
@@ -309,7 +302,7 @@ effie = (function() {
 				update: function(dt, elapsedTime) {
 					effectDuration -= (dt*1000);
 
-					
+
 					for (var i = 0; i < this.particles.length; i++) {
 						if (!this.particles[i].isDead) {
 							this.particles[i].update(dt, elapsedTime);
@@ -319,6 +312,7 @@ effie = (function() {
 							if (effectDuration > 0 && this.particles[i].callbackAfterDeath) {
 								this.particles[i].callbackAfterDeath(this);
 							}
+							this.particles[i] = null;
 							this.particles.splice(i, 1);
 							//console.log(this.particles.length)
 						}
@@ -331,10 +325,3 @@ effie = (function() {
 	}
 
 })();
-
-
-
-
-
-
-
